@@ -1,5 +1,14 @@
+# Core Biology Libraries
 primer3-py
 biopython
+
+# API Framework
+fastapi
+uvicorn[standard]
+pydantic
+python-multipart
+
+# Data Science (optional - remove if not needed)
 numpy
 pandas
 matplotlib
@@ -8,5 +17,4 @@ scipy
 statsmodels
 scikit-learn
 scikit-image
-scikit-optimize
 scikit-optimize
