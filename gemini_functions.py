@@ -4,38 +4,33 @@ These define the tools/functions that Gemini can call to interact with the UniBi
 """
 
 # Function schemas in Gemini's format
+# Using simple dict format that Gemini SDK will convert
 GEMINI_FUNCTIONS = [
     {
         "name": "design_primers",
-        "description": """Design PCR primers for DNA amplification using Primer3. 
-        This function analyzes a DNA sequence and generates optimal primer pairs 
-        based on melting temperature, GC content, and product size constraints.""",
+        "description": "Design PCR primers for DNA amplification using Primer3. Analyzes a DNA sequence and generates optimal primer pairs based on melting temperature, GC content, and product size constraints.",
         "parameters": {
-            "type": "object",
+            "type_": "OBJECT",
             "properties": {
                 "sequence": {
-                    "type": "string",
+                    "type_": "STRING",
                     "description": "The DNA sequence template (5' to 3') for which to design primers. Must contain only valid DNA bases (ATGC)."
                 },
                 "min_tm": {
-                    "type": "number",
-                    "description": "Minimum melting temperature (°C) for primers. Typical range: 50-65°C. Default: 57.0",
-                    "default": 57.0
+                    "type_": "NUMBER",
+                    "description": "Minimum melting temperature (°C) for primers. Typical range: 50-65°C. Default: 57.0"
                 },
                 "max_tm": {
-                    "type": "number",
-                    "description": "Maximum melting temperature (°C) for primers. Must be greater than min_tm. Default: 63.0",
-                    "default": 63.0
+                    "type_": "NUMBER",
+                    "description": "Maximum melting temperature (°C) for primers. Must be greater than min_tm. Default: 63.0"
                 },
                 "prod_min": {
-                    "type": "integer",
-                    "description": "Minimum PCR product size in base pairs. Default: 100",
-                    "default": 100
+                    "type_": "INTEGER",
+                    "description": "Minimum PCR product size in base pairs. Default: 100"
                 },
                 "prod_max": {
-                    "type": "integer",
-                    "description": "Maximum PCR product size in base pairs. Must be greater than prod_min. Default: 300",
-                    "default": 300
+                    "type_": "INTEGER",
+                    "description": "Maximum PCR product size in base pairs. Must be greater than prod_min. Default: 300"
                 }
             },
             "required": ["sequence"]
@@ -43,14 +38,12 @@ GEMINI_FUNCTIONS = [
     },
     {
         "name": "analyze_primer",
-        "description": """Analyze a single primer sequence for thermodynamic properties.
-        Returns melting temperature (Tm), hairpin formation potential, and homodimer formation potential.
-        Useful for validating custom primer designs.""",
+        "description": "Analyze a single primer sequence for thermodynamic properties. Returns melting temperature (Tm), hairpin formation potential, and homodimer formation potential.",
         "parameters": {
-            "type": "object",
+            "type_": "OBJECT",
             "properties": {
                 "sequence": {
-                    "type": "string",
+                    "type_": "STRING",
                     "description": "The primer sequence (5' to 3') to analyze. Must be 15-35 bases long."
                 }
             },
@@ -59,18 +52,16 @@ GEMINI_FUNCTIONS = [
     },
     {
         "name": "check_primer_compatibility",
-        "description": """Check if two primers (forward and reverse) will form primer-dimers.
-        Evaluates heterodimer formation between a primer pair. High dimer formation 
-        (Tm > 40°C) can reduce PCR efficiency.""",
+        "description": "Check if two primers (forward and reverse) will form primer-dimers. Evaluates heterodimer formation between a primer pair.",
         "parameters": {
-            "type": "object",
+            "type_": "OBJECT",
             "properties": {
                 "forward_seq": {
-                    "type": "string",
+                    "type_": "STRING",
                     "description": "Forward primer sequence (5' to 3')"
                 },
                 "reverse_seq": {
-                    "type": "string",
+                    "type_": "STRING",
                     "description": "Reverse primer sequence (5' to 3')"
                 }
             },
@@ -79,18 +70,16 @@ GEMINI_FUNCTIONS = [
     },
     {
         "name": "check_specificity",
-        "description": """Check if a primer binds specifically to a template sequence (exactly once).
-        Searches both DNA strands and handles circular plasmid topology. 
-        Non-specific primers that bind multiple times can cause off-target amplification.""",
+        "description": "Check if a primer binds specifically to a template sequence (exactly once). Searches both DNA strands and handles circular plasmid topology.",
         "parameters": {
-            "type": "object",
+            "type_": "OBJECT",
             "properties": {
                 "primer_seq": {
-                    "type": "string",
+                    "type_": "STRING",
                     "description": "The primer sequence to check"
                 },
                 "template_seq": {
-                    "type": "string",
+                    "type_": "STRING",
                     "description": "The template/plasmid sequence to search against"
                 }
             },
@@ -99,15 +88,12 @@ GEMINI_FUNCTIONS = [
     },
     {
         "name": "find_restriction_sites",
-        "description": """Scan a DNA sequence for restriction enzyme recognition sites.
-        Searches for common commercial enzymes from the REBASE database.
-        Returns enzyme names, number of cut sites, and exact positions.
-        Useful for planning restriction cloning strategies.""",
+        "description": "Scan a DNA sequence for restriction enzyme recognition sites. Searches for common commercial enzymes from the REBASE database.",
         "parameters": {
-            "type": "object",
+            "type_": "OBJECT",
             "properties": {
                 "sequence": {
-                    "type": "string",
+                    "type_": "STRING",
                     "description": "DNA sequence to scan for restriction sites. Must be at least 6 bases long."
                 }
             },
@@ -116,25 +102,21 @@ GEMINI_FUNCTIONS = [
     },
     {
         "name": "design_gibson_primers",
-        "description": """Design primers for Gibson assembly cloning.
-        Generates primers with homology overhangs to seamlessly join an insert 
-        into a vector without restriction enzymes. The default 25bp overlap is 
-        optimal for Gibson assembly reactions.""",
+        "description": "Design primers for Gibson assembly cloning. Generates primers with homology overhangs to seamlessly join an insert into a vector.",
         "parameters": {
-            "type": "object",
+            "type_": "OBJECT",
             "properties": {
                 "vector_seq": {
-                    "type": "string",
+                    "type_": "STRING",
                     "description": "Vector sequence (linearized at insertion site)"
                 },
                 "insert_seq": {
-                    "type": "string",
+                    "type_": "STRING",
                     "description": "Insert sequence to clone into the vector"
                 },
                 "overlap_length": {
-                    "type": "integer",
-                    "description": "Length of homology overlap in base pairs. Recommended: 15-40bp. Default: 25",
-                    "default": 25
+                    "type_": "INTEGER",
+                    "description": "Length of homology overlap in base pairs. Recommended: 15-40bp. Default: 25"
                 }
             },
             "required": ["vector_seq", "insert_seq"]

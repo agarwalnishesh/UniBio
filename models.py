@@ -2,7 +2,7 @@
 Pydantic models for API request/response validation.
 """
 from pydantic import BaseModel, Field, validator
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Any
 
 
 # ============= PRIMER DESIGN MODELS =============
@@ -212,8 +212,8 @@ class ChatRequest(BaseModel):
 class FunctionCall(BaseModel):
     """Model for a single function call made by the agent."""
     function: str
-    arguments: Dict
-    result: Dict
+    arguments: Dict[str, Any]
+    result: Dict[str, Any]
 
 
 class ChatResponse(BaseModel):

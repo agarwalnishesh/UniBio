@@ -108,13 +108,16 @@ class GeminiAgent:
             # Handle function calling loop
             while iteration < max_iterations:
                 # Check if model wants to call a function
-                if not response.candidates:
+                if not response.candidates or not response.candidates[0].content:
+                    break
+                
+                if not response.candidates[0].content.parts:
                     break
                     
-                parts = response.candidates[0].content.parts
+                parts = list(response.candidates[0].content.parts)
                 
                 # Check for function calls
-                function_calls = [part for part in parts if hasattr(part, 'function_call')]
+                function_calls = [part for part in parts if hasattr(part, 'function_call') and part.function_call]
                 
                 if not function_calls:
                     # No more function calls, we have the final response
@@ -166,10 +169,11 @@ class GeminiAgent:
             
             # Extract final text response
             final_text = ""
-            if response.candidates and response.candidates[0].content.parts:
-                for part in response.candidates[0].content.parts:
-                    if hasattr(part, 'text'):
-                        final_text += part.text
+            if response.candidates and response.candidates[0].content:
+                if response.candidates[0].content.parts:
+                    for part in list(response.candidates[0].content.parts):
+                        if hasattr(part, 'text') and part.text:
+                            final_text += part.text
             
             return {
                 "success": True,
