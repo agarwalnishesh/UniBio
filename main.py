@@ -408,7 +408,19 @@ async def chat_with_agent(request: ChatRequest):
     try:
         # Initialize agent with specified or default model
         agent = GeminiAgent(model_name=request.model)
-        agent.start_chat()
+        
+        # Convert history to Gemini format if provided
+        gemini_history = None
+        if request.history:
+            gemini_history = []
+            for msg in request.history:
+                gemini_history.append({
+                    "role": msg.role,
+                    "parts": [{"text": msg.text}]
+                })
+        
+        # Start chat with history
+        agent.start_chat(history=gemini_history)
         
         # Send message and get response
         result = agent.send_message(request.message)
@@ -523,6 +535,6 @@ if __name__ == "__main__":
         "main:app",
         host="0.0.0.0",
         port=8000,
-        reload=True,  # Auto-reload on code changes (disable in production)
+        reload=False,  # Disabled for stability on Windows
         log_level="info"
     )

@@ -71,5 +71,12 @@ logs/
 # *.xlsx
 # *.json
 
+# Node.js / Frontend
+node_modules/
+frontend/node_modules/
+frontend/dist/
+.npm
+*.tsbuildinfo
+
 # OS
 Thumbs.db

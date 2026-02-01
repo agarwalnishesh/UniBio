@@ -228,10 +228,16 @@ class HealthResponse(BaseModel):
 
 # ============= AI AGENT MODELS =============
 
+class ChatMessage(BaseModel):
+    """Model for a single chat message in history."""
+    role: str = Field(..., description="Role: 'user' or 'model'")
+    text: str = Field(..., description="Message content")
+
 class ChatRequest(BaseModel):
     """Request model for AI chat endpoint."""
     message: str = Field(..., description="User's natural language query")
     model: Optional[str] = Field(None, description="Gemini model to use (e.g., gemini-2.0-flash-exp, gemini-1.5-pro)")
+    history: Optional[List[ChatMessage]] = Field(None, description="Conversation history for context")
     
     @validator('message')
     def validate_message(cls, v):

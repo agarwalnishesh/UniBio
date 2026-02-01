@@ -38,6 +38,9 @@ class ToolExecutor:
         """
         self.base_url = base_url or API_BASE_URL
         
+    # Functions that may need longer timeouts (e.g., external API calls)
+    SLOW_FUNCTIONS = {"search_ncbi_nucleotide", "fetch_ncbi_sequence"}
+    
     def execute(self, function_name: str, parameters: Dict[str, Any]) -> Dict[str, Any]:
         """
         Execute a function call by making an HTTP request to the appropriate endpoint.
@@ -66,12 +69,15 @@ class ToolExecutor:
         # Construct full URL
         url = f"{self.base_url}{endpoint}"
         
+        # Use longer timeout for slow operations like NCBI
+        timeout = 60 if function_name in self.SLOW_FUNCTIONS else 30
+        
         try:
             # Make POST request to the endpoint
             response = requests.post(
                 url,
                 json=parameters,
-                timeout=30,  # 30 second timeout
+                timeout=timeout,
                 headers={"Content-Type": "application/json"}
             )
             
@@ -83,7 +89,7 @@ class ToolExecutor:
             
         except requests.exceptions.Timeout:
             return {
-                "error": f"Request to {function_name} timed out after 30 seconds",
+                "error": f"Request to {function_name} timed out after {timeout} seconds",
                 "success": False
             }
         except requests.exceptions.ConnectionError:

@@ -9,7 +9,7 @@ import google.generativeai as genai
 from dotenv import load_dotenv
 
 from gemini_functions import get_function_declarations
-from tool_executor import ToolExecutor
+from tool_executor_direct import DirectToolExecutor
 
 # Load environment variables
 load_dotenv()
@@ -63,13 +63,8 @@ class GeminiAgent:
             tools=self.functions
         )
         
-        # Initialize tool executor
-        self.tool_executor = ToolExecutor()
-        
-        # Check if API server is running
-        if not self.tool_executor.health_check():
-            print("⚠️  Warning: API server doesn't appear to be running at localhost:8000")
-            print("   Make sure to start the server with: python main.py")
+        # Initialize direct tool executor (calls functions directly, no HTTP)
+        self.tool_executor = DirectToolExecutor()
         
         # Initialize chat session
         self.chat = None
