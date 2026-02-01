@@ -1,0 +1,12 @@
+primer3-py
+biopython
+numpy
+pandas
+matplotlib
+seaborn
+scipy
+statsmodels
+scikit-learn
+scikit-image
+scikit-optimize
+scikit-optimize
