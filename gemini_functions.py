@@ -121,6 +121,38 @@ GEMINI_FUNCTIONS = [
             },
             "required": ["vector_seq", "insert_seq"]
         }
+    },
+    {
+        "name": "search_ncbi_nucleotide",
+        "description": "Search the NCBI nucleotide database for DNA sequences (GenBank/RefSeq). Returns a list of matching records with accession IDs and titles. Use this when the user asks for a gene or organism but doesn't provide a sequence.",
+        "parameters": {
+            "type_": "OBJECT",
+            "properties": {
+                "query": {
+                    "type_": "STRING",
+                    "description": "The search term (e.g., 'human insulin gene', 'SARS-CoV-2 genome', 'NM_000600')"
+                },
+                "retmax": {
+                    "type_": "INTEGER",
+                    "description": "Maximum number of results to return. Default: 5"
+                }
+            },
+            "required": ["query"]
+        }
+    },
+    {
+        "name": "fetch_ncbi_sequence",
+        "description": "Fetch a full DNA sequence from NCBI using an accession ID. Use this after finding an accession ID with search_ncbi_nucleotide to get the actual sequence for primer design or analysis.",
+        "parameters": {
+            "type_": "OBJECT",
+            "properties": {
+                "accession_id": {
+                    "type_": "STRING",
+                    "description": "The NCBI accession ID (e.g., 'NM_000600.5')"
+                }
+            },
+            "required": ["accession_id"]
+        }
     }
 ]
 

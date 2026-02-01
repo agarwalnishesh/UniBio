@@ -183,6 +183,40 @@ class GibsonAssemblyResponse(BaseModel):
     message: Optional[str] = None
 
 
+# ============= NCBI MODELS =============
+
+class NCBISearchRequest(BaseModel):
+    """Request model for NCBI search."""
+    query: str = Field(..., description="Search term for NCBI nucleotide database")
+    retmax: int = Field(5, ge=1, le=20, description="Maximum results to return")
+
+class NCBISearchResult(BaseModel):
+    """Model for a single NCBI search result."""
+    accession: str
+    title: str
+    id: str
+    length: int
+
+class NCBISearchResponse(BaseModel):
+    """Response model for NCBI search."""
+    success: bool
+    results: List[NCBISearchResult]
+    message: Optional[str] = None
+
+class NCBIFetchRequest(BaseModel):
+    """Request model for NCBI fetch."""
+    accession_id: str = Field(..., description="NCBI accession ID to fetch")
+
+class NCBIFetchResponse(BaseModel):
+    """Response model for NCBI fetch."""
+    success: bool
+    accession: str
+    description: str
+    sequence: str
+    length: int
+    message: Optional[str] = None
+
+
 # ============= HEALTH CHECK MODEL =============
 
 class HealthResponse(BaseModel):

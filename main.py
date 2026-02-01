@@ -18,6 +18,8 @@ from models import (
     SpecificityCheckRequest, SpecificityCheckResponse,
     RestrictionSiteRequest, RestrictionSiteResponse, RestrictionEnzyme,
     GibsonAssemblyRequest, GibsonAssemblyResponse,
+    NCBISearchRequest, NCBISearchResponse, NCBISearchResult,
+    NCBIFetchRequest, NCBIFetchResponse,
     HealthResponse,
     ChatRequest, ChatResponse, FunctionCall
 )
@@ -25,6 +27,7 @@ from utils.primer3_util import PrimerEngine
 from utils.check_specificity import check_specificity
 from utils.Restriction_Enzyme import find_restriction_sites
 from utils.Gibson_Assembly import design_gibson_primers
+from utils.ncbi_util import NCBIUtil
 
 # Import Gemini agent (will be lazy-loaded to avoid startup errors if API key missing)
 try:
@@ -72,6 +75,8 @@ async def root():
             "/check-specificity",
             "/find-restriction-sites",
             "/design-gibson",
+            "/ncbi-search",
+            "/ncbi-fetch",
             "/chat",
             "/chat/models"
         ]
@@ -311,6 +316,67 @@ async def design_gibson_assembly(request: GibsonAssemblyRequest):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Gibson assembly design failed: {str(e)}"
+        )
+
+
+# ============= NCBI ENDPOINTS =============
+
+@app.post("/ncbi-search", response_model=NCBISearchResponse)
+async def search_ncbi(request: NCBISearchRequest):
+    """
+    Search NCBI nucleotide database for sequences.
+    """
+    try:
+        results = NCBIUtil.search_nucleotide(request.query, request.retmax)
+        
+        formatted_results = [
+            NCBISearchResult(
+                accession=r['accession'],
+                title=r['title'],
+                id=r['id'],
+                length=r['length']
+            )
+            for r in results
+        ]
+        
+        return {
+            "success": True,
+            "results": formatted_results,
+            "message": f"Found {len(formatted_results)} results for '{request.query}'"
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"NCBI search failed: {str(e)}"
+        )
+
+@app.post("/ncbi-fetch", response_model=NCBIFetchResponse)
+async def fetch_ncbi(request: NCBIFetchRequest):
+    """
+    Fetch a sequence from NCBI by accession ID.
+    """
+    try:
+        result = NCBIUtil.fetch_sequence(request.accession_id)
+        
+        if not result:
+            return {
+                "success": False,
+                "accession": request.accession_id,
+                "description": "",
+                "sequence": "",
+                "length": 0,
+                "message": f"Could not find sequence with accession ID: {request.accession_id}"
+            }
+            
+        return {
+            "success": True,
+            **result,
+            "message": f"Successfully fetched sequence {request.accession_id}"
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"NCBI fetch failed: {str(e)}"
         )
 
 

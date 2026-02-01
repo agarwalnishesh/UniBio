@@ -24,7 +24,9 @@ class ToolExecutor:
         "check_primer_compatibility": "/check-compatibility",
         "check_specificity": "/check-specificity",
         "find_restriction_sites": "/find-restriction-sites",
-        "design_gibson_primers": "/design-gibson"
+        "design_gibson_primers": "/design-gibson",
+        "search_ncbi_nucleotide": "/ncbi-search",
+        "fetch_ncbi_sequence": "/ncbi-fetch"
     }
     
     def __init__(self, base_url: str = None):
