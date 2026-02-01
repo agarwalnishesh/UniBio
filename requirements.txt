@@ -8,6 +8,11 @@ uvicorn[standard]
 pydantic
 python-multipart
 
+# AI/Agent
+google-generativeai
+python-dotenv
+requests
+
 # Data Science (optional - remove if not needed)
 numpy
 pandas

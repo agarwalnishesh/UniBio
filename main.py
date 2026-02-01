@@ -18,12 +18,21 @@ from models import (
     SpecificityCheckRequest, SpecificityCheckResponse,
     RestrictionSiteRequest, RestrictionSiteResponse, RestrictionEnzyme,
     GibsonAssemblyRequest, GibsonAssemblyResponse,
-    HealthResponse
+    HealthResponse,
+    ChatRequest, ChatResponse, FunctionCall
 )
 from utils.primer3_util import PrimerEngine
 from utils.check_specificity import check_specificity
 from utils.Restriction_Enzyme import find_restriction_sites
 from utils.Gibson_Assembly import design_gibson_primers
+
+# Import Gemini agent (will be lazy-loaded to avoid startup errors if API key missing)
+try:
+    from gemini_agent import GeminiAgent
+    GEMINI_AVAILABLE = True
+except Exception as e:
+    GEMINI_AVAILABLE = False
+    GEMINI_ERROR = str(e)
 
 
 # ============= APP INITIALIZATION =============
@@ -62,7 +71,9 @@ async def root():
             "/check-compatibility",
             "/check-specificity",
             "/find-restriction-sites",
-            "/design-gibson"
+            "/design-gibson",
+            "/chat",
+            "/chat/models"
         ]
     }
 
@@ -301,6 +312,130 @@ async def design_gibson_assembly(request: GibsonAssemblyRequest):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Gibson assembly design failed: {str(e)}"
         )
+
+
+# ============= AI AGENT ENDPOINTS =============
+
+@app.post("/chat", response_model=ChatResponse)
+async def chat_with_agent(request: ChatRequest):
+    """
+    Natural language interface powered by Google Gemini.
+    
+    Send a question in plain English and the AI agent will:
+    1. Understand your intent
+    2. Call the appropriate molecular biology tools
+    3. Chain multiple operations if needed
+    4. Return results in natural language
+    
+    Examples:
+    - "Design primers to amplify a 200bp region of this sequence: ATGC..."
+    - "Check if this primer forms dimers: ATCGATCG"
+    - "Find restriction sites in my plasmid: GAATTCGGATCC..."
+    - "Design Gibson assembly primers for cloning GFP into pET28a"
+    """
+    if not GEMINI_AVAILABLE:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"Gemini agent not available: {GEMINI_ERROR}. Check your GEMINI_API_KEY in .env file."
+        )
+    
+    try:
+        # Initialize agent with specified or default model
+        agent = GeminiAgent(model_name=request.model)
+        agent.start_chat()
+        
+        # Send message and get response
+        result = agent.send_message(request.message)
+        
+        if result["success"]:
+            # Format function calls for response
+            function_calls = [
+                FunctionCall(
+                    function=fc["function"],
+                    arguments=fc["arguments"],
+                    result=fc["result"]
+                )
+                for fc in result.get("function_calls", [])
+            ]
+            
+            return ChatResponse(
+                success=True,
+                response=result["response"],
+                model=result["model"],
+                function_calls=function_calls,
+                iterations=result.get("iterations", 0)
+            )
+        else:
+            return ChatResponse(
+                success=False,
+                response="",
+                model=result.get("model", "unknown"),
+                error=result.get("error", "Unknown error occurred")
+            )
+            
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Chat failed: {str(e)}"
+        )
+
+
+@app.get("/chat/models")
+async def list_available_models():
+    """
+    List all available Gemini models that can be used with the chat endpoint.
+    
+    Returns model names and their characteristics.
+    """
+    if not GEMINI_AVAILABLE:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Gemini agent not available. Check your GEMINI_API_KEY in .env file."
+        )
+    
+    models = GeminiAgent.list_available_models()
+    
+    model_info = {
+        "gemini-2.5-flash": {
+            "name": "Gemini 2.5 Flash",
+            "description": "Latest model (Feb 2026), fastest, cheapest, multimodal",
+            "best_for": "Most use cases, real-time applications"
+        },
+        "gemini-2.5-pro": {
+            "name": "Gemini 2.5 Pro",
+            "description": "Latest Pro model, most capable",
+            "best_for": "Complex reasoning, critical applications"
+        },
+        "gemini-2.0-flash": {
+            "name": "Gemini 2.0 Flash",
+            "description": "Fast and efficient, stable release",
+            "best_for": "Production use, reliable performance"
+        },
+        "gemini-1.5-pro": {
+            "name": "Gemini 1.5 Pro",
+            "description": "Most capable, 2M token context window",
+            "best_for": "Complex reasoning, long sequences"
+        },
+        "gemini-1.5-flash": {
+            "name": "Gemini 1.5 Flash",
+            "description": "Fast and efficient, good balance",
+            "best_for": "General purpose, production use"
+        },
+        "gemini-1.5-flash-8b": {
+            "name": "Gemini 1.5 Flash 8B",
+            "description": "Smallest, fastest response time",
+            "best_for": "Simple tasks, high throughput"
+        }
+    }
+    
+    return {
+        "available_models": models,
+        "model_details": {
+            model: model_info.get(model, {"name": model, "description": "Custom model"})
+            for model in models
+        },
+        "default_model": "gemini-2.5-flash"
+    }
 
 
 # ============= ERROR HANDLERS =============

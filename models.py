@@ -190,3 +190,37 @@ class HealthResponse(BaseModel):
     status: str
     version: str
     available_endpoints: List[str]
+
+
+# ============= AI AGENT MODELS =============
+
+class ChatRequest(BaseModel):
+    """Request model for AI chat endpoint."""
+    message: str = Field(..., description="User's natural language query")
+    model: Optional[str] = Field(None, description="Gemini model to use (e.g., gemini-2.0-flash-exp, gemini-1.5-pro)")
+    
+    @validator('message')
+    def validate_message(cls, v):
+        v = v.strip()
+        if not v:
+            raise ValueError("Message cannot be empty")
+        if len(v) > 10000:
+            raise ValueError("Message too long (max 10000 characters)")
+        return v
+
+
+class FunctionCall(BaseModel):
+    """Model for a single function call made by the agent."""
+    function: str
+    arguments: Dict
+    result: Dict
+
+
+class ChatResponse(BaseModel):
+    """Response model for AI chat endpoint."""
+    success: bool
+    response: str
+    model: str
+    function_calls: List[FunctionCall] = []
+    iterations: int = 0
+    error: Optional[str] = None
