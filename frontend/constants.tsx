@@ -3,7 +3,8 @@ import {
   BeakerIcon, 
   ScissorsIcon, 
   LinkIcon, 
-  HomeIcon 
+  HomeIcon,
+  MagnifyingGlassIcon
 } from '@heroicons/react/24/outline';
 
 export const DEFAULT_PRIMER_DATA: PrimerDesignData = {
@@ -43,6 +44,13 @@ export const TOOLS: Record<ToolId, ToolDefinition> = {
     description: "Design overlaps for isothermal assembly of fragments.",
     icon: LinkIcon,
     defaultData: { fragments: [], minOverlap: 20 }
+  },
+  [ToolId.NCBI_SEARCH]: {
+    id: ToolId.NCBI_SEARCH,
+    name: "NCBI Search",
+    description: "Search and fetch sequences from NCBI GenBank database.",
+    icon: MagnifyingGlassIcon,
+    defaultData: { query: "", maxResults: 10 }
   }
 };
 

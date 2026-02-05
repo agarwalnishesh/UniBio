@@ -98,9 +98,9 @@ const RestrictionAnalyzer: React.FC = () => {
                   </div>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                     {singleCutters.map((enzyme) => (
-                      <div key={enzyme.enzyme_name} className="bg-slate-50 rounded-lg p-3 border border-slate-100">
-                        <div className="font-medium text-slate-800">{enzyme.enzyme_name}</div>
-                        <div className="text-xs text-slate-500 mt-1">
+                      <div key={enzyme.enzyme_name} className="bg-slate-50 rounded-lg p-3 border border-slate-100 overflow-hidden">
+                        <div className="font-medium text-slate-800 truncate">{enzyme.enzyme_name}</div>
+                        <div className="text-xs text-slate-500 mt-1 truncate" title={`Position: ${enzyme.cut_positions.join(', ')}`}>
                           Position: {enzyme.cut_positions.join(', ')}
                         </div>
                       </div>
@@ -116,7 +116,7 @@ const RestrictionAnalyzer: React.FC = () => {
                     <div className="w-2 h-2 rounded-full bg-amber-500"></div>
                     <h3 className="font-semibold text-slate-800">Multiple Cutters ({multiCutters.length})</h3>
                   </div>
-                  <div className="overflow-hidden rounded-lg border border-slate-200">
+                  <div className="overflow-x-auto rounded-lg border border-slate-200">
                     <table className="min-w-full divide-y divide-slate-200">
                       <thead className="bg-slate-50">
                         <tr>

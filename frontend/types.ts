@@ -11,7 +11,8 @@ export enum ToolId {
   DASHBOARD = 'dashboard',
   PRIMER_DESIGN = 'primer_design',
   RESTRICTION_ANALYZER = 'restriction_analyzer',
-  GIBSON_ASSEMBLY = 'gibson_assembly'
+  GIBSON_ASSEMBLY = 'gibson_assembly',
+  NCBI_SEARCH = 'ncbi_search'
 }
 
 // -- Form Data Types --
@@ -36,8 +37,13 @@ export interface GibsonData {
   minOverlap: number;
 }
 
+export interface NCBISearchData {
+  query: string;
+  maxResults: number;
+}
+
 // Union type for all tool data
-export type ToolData = PrimerDesignData | RestrictionData | GibsonData | Record<string, any>;
+export type ToolData = PrimerDesignData | RestrictionData | GibsonData | NCBISearchData | Record<string, any>;
 
 // -- Agent & Chat Types --
 

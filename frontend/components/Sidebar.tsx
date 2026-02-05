@@ -7,7 +7,7 @@ const Sidebar: React.FC = () => {
   const { activeTool, setActiveTool } = useApp();
 
   return (
-    <div className="w-64 bg-slate-900 border-r border-slate-800 flex flex-col h-full text-slate-300">
+    <div className="w-64 bg-slate-900 border-r border-slate-800 flex flex-col h-full text-slate-300 flex-shrink-0">
       <div className="p-6">
         <div className="flex items-center gap-3 mb-8">
             <div className="w-8 h-8 rounded bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center text-white font-bold">

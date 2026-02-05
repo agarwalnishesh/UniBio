@@ -57,10 +57,26 @@ class GeminiAgent:
         # Get function declarations
         self.functions = get_function_declarations()
         
-        # Initialize model with tools
+        # System instruction to ensure consistent responses
+        system_instruction = """You are UniBio, an expert molecular biology assistant. You help scientists with:
+- Designing PCR primers
+- Analyzing DNA sequences
+- Finding restriction enzyme sites
+- Planning Gibson assembly cloning
+- Searching NCBI databases
+
+IMPORTANT RULES:
+1. ALWAYS provide a final text response summarizing what you did and the results
+2. After calling tools, explain the results in clear scientific language
+3. If you design primers, always show the primer sequences, Tm, and product size
+4. Be concise but thorough in your explanations
+5. Never end without a text response to the user"""
+        
+        # Initialize model with tools and system instruction
         self.model = genai.GenerativeModel(
             model_name=self.model_name,
-            tools=self.functions
+            tools=self.functions,
+            system_instruction=system_instruction
         )
         
         # Initialize direct tool executor (calls functions directly, no HTTP)
@@ -169,6 +185,24 @@ class GeminiAgent:
                     for part in list(response.candidates[0].content.parts):
                         if hasattr(part, 'text') and part.text:
                             final_text += part.text
+            
+            # If we made function calls but got no text, generate a summary
+            if not final_text.strip() and function_calls_made:
+                tool_names = [fc["function"] for fc in function_calls_made]
+                final_text = f"I've completed the requested operations using: {', '.join(tool_names)}. "
+                
+                # Add context based on what tools were used
+                if "design_primers" in tool_names:
+                    last_primer_result = next((fc["result"] for fc in reversed(function_calls_made) if fc["function"] == "design_primers"), None)
+                    if last_primer_result and last_primer_result.get("success"):
+                        pairs = last_primer_result.get("primer_pairs", [])
+                        if pairs:
+                            final_text += f"Found {len(pairs)} primer pair(s). The best pair has a product size of {pairs[0].get('product_size', 'N/A')} bp."
+                
+                if "search_ncbi_nucleotide" in tool_names or "fetch_ncbi_sequence" in tool_names:
+                    last_fetch = next((fc["result"] for fc in reversed(function_calls_made) if fc["function"] == "fetch_ncbi_sequence"), None)
+                    if last_fetch and last_fetch.get("success"):
+                        final_text += f" Retrieved sequence {last_fetch.get('accession', 'N/A')} ({last_fetch.get('length', 0)} bp)."
             
             return {
                 "success": True,

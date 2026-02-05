@@ -6,6 +6,7 @@ import { ToolId } from './types';
 import PrimerDesign from './components/tools/PrimerDesign';
 import RestrictionAnalyzer from './components/tools/RestrictionAnalyzer';
 import GibsonAssembly from './components/tools/GibsonAssembly';
+import NCBISearch from './components/tools/NCBISearch';
 import Dashboard from './components/tools/Dashboard';
 
 // Wrapper component to handle routing based on state
@@ -20,6 +21,8 @@ const MainContent: React.FC = () => {
         return <RestrictionAnalyzer />;
       case ToolId.GIBSON_ASSEMBLY:
         return <GibsonAssembly />;
+      case ToolId.NCBI_SEARCH:
+        return <NCBISearch />;
       case ToolId.DASHBOARD:
       default:
         return <Dashboard />;

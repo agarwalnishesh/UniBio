@@ -9,6 +9,25 @@
     scrollbar-width: none;
 }
 
+/* Subtle scrollbar for other areas */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
 /* DNA sequence styling */
 .font-mono {
     font-variant-ligatures: none;
@@ -45,4 +64,122 @@ button:focus {
 .writing-mode-vertical {
     writing-mode: vertical-rl;
     text-orientation: mixed;
+}
+
+/* Markdown content styling */
+.markdown-content {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+}
+
+.markdown-content pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.markdown-content code {
+    word-break: break-all;
+}
+
+/* Text overflow handling */
+.break-words {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+.truncate-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.truncate-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* DNA Sequence display */
+.dna-sequence {
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.05em;
+    word-break: break-all;
+    line-height: 1.6;
+}
+
+/* Table improvements */
+table {
+    border-collapse: collapse;
+}
+
+th, td {
+    text-align: left;
+}
+
+/* Button hover effects */
+button {
+    transition: all 0.2s ease;
+}
+
+/* Card hover effects */
+.card-hover {
+    transition: all 0.2s ease;
+}
+
+.card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Input focus ring */
+input:focus,
+textarea:focus,
+select:focus {
+    box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
+}
+
+/* Tooltip styles */
+[title] {
+    position: relative;
+}
+
+/* Selection color */
+::selection {
+    background-color: rgba(20, 184, 166, 0.2);
+    color: inherit;
+}
+
+/* Print styles */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+}
+
+/* Responsive text */
+@media (max-width: 640px) {
+    .text-responsive {
+        font-size: 0.875rem;
+    }
+}
+
+/* Animation for loading states */
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.animate-shimmer {
+    background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
 }
