@@ -8,6 +8,7 @@ import RestrictionAnalyzer from './components/tools/RestrictionAnalyzer';
 import GibsonAssembly from './components/tools/GibsonAssembly';
 import NCBISearch from './components/tools/NCBISearch';
 import Dashboard from './components/tools/Dashboard';
+import PaperSearch from './components/tools/PaperSearch';
 
 // Wrapper component to handle routing based on state
 const MainContent: React.FC = () => {
@@ -23,6 +24,8 @@ const MainContent: React.FC = () => {
         return <GibsonAssembly />;
       case ToolId.NCBI_SEARCH:
         return <NCBISearch />;
+      case ToolId.PAPER_SEARCH:
+        return <PaperSearch />;
       case ToolId.DASHBOARD:
       default:
         return <Dashboard />;

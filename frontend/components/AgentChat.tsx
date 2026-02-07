@@ -13,7 +13,7 @@ const AgentChat: React.FC = () => {
     { 
       id: 'welcome', 
       role: 'model', 
-      text: "Hello! I'm your UniBio research assistant powered by AI. I can help you:\n\n• Design PCR primers\n• Find restriction sites\n• Plan Gibson assemblies\n• Search NCBI databases\n\nWhat would you like to work on today?",
+      text: "Hello! I'm your UniBio research assistant powered by AI. I can help you:\n\n• Design PCR primers\n• Find restriction sites\n• Plan Gibson assemblies\n• Search NCBI databases\n• Find research papers on PubMed\n\nWhat would you like to work on today?",
       isToolCall: false
     }
   ]);
@@ -236,6 +236,12 @@ const AgentChat: React.FC = () => {
             className="text-xs px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-full whitespace-nowrap transition-colors flex-shrink-0"
           >
             Search NCBI
+          </button>
+          <button 
+            onClick={() => setInput("Find research papers about")}
+            className="text-xs px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-full whitespace-nowrap transition-colors"
+          >
+            Find Papers
           </button>
         </div>
       </div>

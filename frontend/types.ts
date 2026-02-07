@@ -12,7 +12,8 @@ export enum ToolId {
   PRIMER_DESIGN = 'primer_design',
   RESTRICTION_ANALYZER = 'restriction_analyzer',
   GIBSON_ASSEMBLY = 'gibson_assembly',
-  NCBI_SEARCH = 'ncbi_search'
+  NCBI_SEARCH = 'ncbi_search',
+  PAPER_SEARCH = 'paper_search'
 }
 
 // -- Form Data Types --
@@ -42,8 +43,14 @@ export interface NCBISearchData {
   maxResults: number;
 }
 
+export interface PaperSearchData {
+  query: string;
+  maxResults: number;
+  sort: 'relevance' | 'pub_date' | 'first_author';
+}
+
 // Union type for all tool data
-export type ToolData = PrimerDesignData | RestrictionData | GibsonData | NCBISearchData | Record<string, any>;
+export type ToolData = PrimerDesignData | RestrictionData | GibsonData | NCBISearchData | PaperSearchData | Record<string, any>;
 
 // -- Agent & Chat Types --
 

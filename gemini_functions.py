@@ -153,6 +153,42 @@ GEMINI_FUNCTIONS = [
             },
             "required": ["accession_id"]
         }
+    },
+    {
+        "name": "search_research_papers",
+        "description": "Search PubMed for scientific research papers and publications. Returns paper titles, authors, journals, abstracts, and PubMed URLs. Use this when the user asks about research, papers, literature, studies, or publications related to molecular biology, genetics, or any biomedical topic.",
+        "parameters": {
+            "type_": "OBJECT",
+            "properties": {
+                "query": {
+                    "type_": "STRING",
+                    "description": "Search query for PubMed (e.g., 'CRISPR cas9 gene editing', 'PCR primer design optimization', 'Gibson assembly cloning')"
+                },
+                "max_results": {
+                    "type_": "INTEGER",
+                    "description": "Maximum number of papers to return. Default: 5"
+                },
+                "sort": {
+                    "type_": "STRING",
+                    "description": "Sort order: 'relevance' (default), 'pub_date' (newest first), or 'first_author'"
+                }
+            },
+            "required": ["query"]
+        }
+    },
+    {
+        "name": "fetch_paper_details",
+        "description": "Fetch full details of a research paper from PubMed by its PMID (PubMed ID). Returns complete abstract, keywords, MeSH terms, and full author list. Use this after search_research_papers to get the complete details of a specific paper.",
+        "parameters": {
+            "type_": "OBJECT",
+            "properties": {
+                "pmid": {
+                    "type_": "STRING",
+                    "description": "The PubMed ID of the paper (e.g., '12345678')"
+                }
+            },
+            "required": ["pmid"]
+        }
     }
 ]
 

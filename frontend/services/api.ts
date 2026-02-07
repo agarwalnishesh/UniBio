@@ -91,6 +91,39 @@ export interface NCBIFetchResponse {
   message?: string;
 }
 
+export interface PaperSearchResult {
+  pmid: string;
+  title: string;
+  authors: string;
+  journal: string;
+  year: string;
+  abstract_preview: string;
+  doi: string;
+  pubmed_url: string;
+}
+
+export interface PaperSearchResponse {
+  success: boolean;
+  results: PaperSearchResult[];
+  total_count?: number;
+  message?: string;
+}
+
+export interface PaperDetailResponse {
+  success: boolean;
+  pmid: string;
+  title: string;
+  authors: string;
+  journal: string;
+  year: string;
+  abstract: string;
+  doi: string;
+  pubmed_url: string;
+  keywords: string[];
+  mesh_terms: string[];
+  message?: string;
+}
+
 export interface FunctionCall {
   function: string;
   arguments: Record<string, any>;
@@ -250,6 +283,25 @@ class ApiService {
     return this.request<NCBIFetchResponse>('/ncbi-fetch', {
       method: 'POST',
       body: JSON.stringify({ accession_id }),
+    });
+  }
+
+  // Paper Search
+  async searchPapers(
+    query: string,
+    max_results: number = 10,
+    sort: string = 'relevance'
+  ): Promise<PaperSearchResponse> {
+    return this.request<PaperSearchResponse>('/search-papers', {
+      method: 'POST',
+      body: JSON.stringify({ query, max_results, sort }),
+    });
+  }
+
+  async fetchPaperDetails(pmid: string): Promise<PaperDetailResponse> {
+    return this.request<PaperDetailResponse>('/fetch-paper', {
+      method: 'POST',
+      body: JSON.stringify({ pmid }),
     });
   }
 

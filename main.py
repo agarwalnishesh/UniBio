@@ -20,6 +20,8 @@ from models import (
     GibsonAssemblyRequest, GibsonAssemblyResponse,
     NCBISearchRequest, NCBISearchResponse, NCBISearchResult,
     NCBIFetchRequest, NCBIFetchResponse,
+    PaperSearchRequest, PaperSearchResponse, PaperSearchResult,
+    PaperDetailRequest, PaperDetailResponse,
     HealthResponse,
     ChatRequest, ChatResponse, FunctionCall
 )
@@ -28,6 +30,7 @@ from utils.check_specificity import check_specificity
 from utils.Restriction_Enzyme import find_restriction_sites
 from utils.Gibson_Assembly import design_gibson_primers
 from utils.ncbi_util import NCBIUtil
+from utils.pubmed_util import PubMedUtil
 
 # Import Gemini agent (will be lazy-loaded to avoid startup errors if API key missing)
 try:
@@ -77,6 +80,8 @@ async def root():
             "/design-gibson",
             "/ncbi-search",
             "/ncbi-fetch",
+            "/search-papers",
+            "/fetch-paper",
             "/chat",
             "/chat/models"
         ]
@@ -377,6 +382,95 @@ async def fetch_ncbi(request: NCBIFetchRequest):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"NCBI fetch failed: {str(e)}"
+        )
+
+
+# ============= PAPER SEARCH ENDPOINTS =============
+
+@app.post("/search-papers", response_model=PaperSearchResponse)
+async def search_papers(request: PaperSearchRequest):
+    """
+    Search PubMed for research papers.
+    
+    Find scientific literature related to your research topic.
+    Supports queries like:
+    - "CRISPR cas9 gene editing"
+    - "PCR primer design optimization"
+    - "Gibson assembly cloning efficiency"
+    """
+    try:
+        results = PubMedUtil.search_papers(
+            query=request.query,
+            max_results=request.max_results,
+            sort=request.sort
+        )
+        
+        total_count = None
+        if results and "_total_results" in results[0]:
+            total_count = results[0].pop("_total_results")
+        
+        formatted_results = [
+            PaperSearchResult(
+                pmid=r.get("pmid", ""),
+                title=r.get("title", ""),
+                authors=r.get("authors", ""),
+                journal=r.get("journal", ""),
+                year=r.get("year", ""),
+                abstract_preview=r.get("abstract_preview", ""),
+                doi=r.get("doi", ""),
+                pubmed_url=r.get("pubmed_url", "")
+            )
+            for r in results
+        ]
+        
+        return {
+            "success": True,
+            "results": formatted_results,
+            "total_count": total_count,
+            "message": f"Found {len(formatted_results)} papers for '{request.query}'"
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Paper search failed: {str(e)}"
+        )
+
+
+@app.post("/fetch-paper", response_model=PaperDetailResponse)
+async def fetch_paper(request: PaperDetailRequest):
+    """
+    Fetch full details of a research paper by PubMed ID.
+    
+    Returns complete abstract, keywords, MeSH terms, and more.
+    """
+    try:
+        result = PubMedUtil.fetch_paper_details(request.pmid)
+        
+        if not result:
+            return {
+                "success": False,
+                "pmid": request.pmid,
+                "message": f"Could not find paper with PMID: {request.pmid}"
+            }
+        
+        return {
+            "success": True,
+            "pmid": result.get("pmid", ""),
+            "title": result.get("title", ""),
+            "authors": result.get("authors", ""),
+            "journal": result.get("journal", ""),
+            "year": result.get("year", ""),
+            "abstract": result.get("abstract", ""),
+            "doi": result.get("doi", ""),
+            "pubmed_url": result.get("pubmed_url", ""),
+            "keywords": result.get("keywords", []),
+            "mesh_terms": result.get("mesh_terms", []),
+            "message": f"Successfully fetched paper PMID:{request.pmid}"
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Paper fetch failed: {str(e)}"
         )
 
 

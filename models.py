@@ -217,6 +217,61 @@ class NCBIFetchResponse(BaseModel):
     message: Optional[str] = None
 
 
+# ============= PAPER SEARCH MODELS =============
+
+class PaperSearchRequest(BaseModel):
+    """Request model for searching research papers on PubMed."""
+    query: str = Field(..., description="Search term for PubMed (e.g., 'CRISPR cas9 gene editing')")
+    max_results: int = Field(10, ge=1, le=50, description="Maximum number of results to return")
+    sort: str = Field("relevance", description="Sort order: 'relevance', 'pub_date', or 'first_author'")
+
+    @validator('query')
+    def validate_query(cls, v):
+        v = v.strip()
+        if not v:
+            raise ValueError("Search query cannot be empty")
+        if len(v) > 500:
+            raise ValueError("Search query too long (max 500 characters)")
+        return v
+
+class PaperSearchResult(BaseModel):
+    """Model for a single paper search result."""
+    pmid: str
+    title: str
+    authors: str
+    journal: str
+    year: str
+    abstract_preview: str
+    doi: str
+    pubmed_url: str
+
+class PaperSearchResponse(BaseModel):
+    """Response model for paper search."""
+    success: bool
+    results: List[PaperSearchResult]
+    total_count: Optional[int] = None
+    message: Optional[str] = None
+
+class PaperDetailRequest(BaseModel):
+    """Request model for fetching full paper details."""
+    pmid: str = Field(..., description="PubMed ID of the paper")
+
+class PaperDetailResponse(BaseModel):
+    """Response model for paper details."""
+    success: bool
+    pmid: str = ""
+    title: str = ""
+    authors: str = ""
+    journal: str = ""
+    year: str = ""
+    abstract: str = ""
+    doi: str = ""
+    pubmed_url: str = ""
+    keywords: List[str] = []
+    mesh_terms: List[str] = []
+    message: Optional[str] = None
+
+
 # ============= HEALTH CHECK MODEL =============
 
 class HealthResponse(BaseModel):

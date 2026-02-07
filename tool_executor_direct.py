@@ -10,6 +10,7 @@ from utils.check_specificity import check_specificity
 from utils.Restriction_Enzyme import find_restriction_sites
 from utils.Gibson_Assembly import design_gibson_primers
 from utils.ncbi_util import NCBIUtil
+from utils.pubmed_util import PubMedUtil
 
 
 class DirectToolExecutor:
@@ -43,6 +44,10 @@ class DirectToolExecutor:
                 return self._search_ncbi(parameters)
             elif function_name == "fetch_ncbi_sequence":
                 return self._fetch_ncbi(parameters)
+            elif function_name == "search_research_papers":
+                return self._search_papers(parameters)
+            elif function_name == "fetch_paper_details":
+                return self._fetch_paper_details(parameters)
             else:
                 return {
                     "error": f"Unknown function: {function_name}",
@@ -174,6 +179,39 @@ class DirectToolExecutor:
         return {
             "success": False,
             "message": "Could not fetch sequence"
+        }
+    
+    def _search_papers(self, params: Dict) -> Dict:
+        max_results = int(params.get("max_results", 5))
+        sort = params.get("sort", "relevance")
+        results = PubMedUtil.search_papers(
+            query=params.get("query", ""),
+            max_results=max_results,
+            sort=sort
+        )
+        # Remove internal fields
+        for r in results:
+            r.pop("_total_results", None)
+            r.pop("authors_full", None)
+            r.pop("publication_type", None)
+            r.pop("mesh_terms", None)
+        return {
+            "success": True,
+            "results": results,
+            "message": f"Found {len(results)} papers"
+        }
+    
+    def _fetch_paper_details(self, params: Dict) -> Dict:
+        result = PubMedUtil.fetch_paper_details(params.get("pmid", ""))
+        if result:
+            return {
+                "success": True,
+                **result,
+                "message": "Successfully fetched paper details"
+            }
+        return {
+            "success": False,
+            "message": "Could not fetch paper details"
         }
     
     def health_check(self) -> bool:

@@ -4,7 +4,8 @@ import {
   ScissorsIcon, 
   LinkIcon, 
   HomeIcon,
-  MagnifyingGlassIcon
+  MagnifyingGlassIcon,
+  DocumentMagnifyingGlassIcon
 } from '@heroicons/react/24/outline';
 
 export const DEFAULT_PRIMER_DATA: PrimerDesignData = {
@@ -51,6 +52,13 @@ export const TOOLS: Record<ToolId, ToolDefinition> = {
     description: "Search and fetch sequences from NCBI GenBank database.",
     icon: MagnifyingGlassIcon,
     defaultData: { query: "", maxResults: 10 }
+  },
+  [ToolId.PAPER_SEARCH]: {
+    id: ToolId.PAPER_SEARCH,
+    name: "Paper Search",
+    description: "Find research papers on PubMed for any biomedical topic.",
+    icon: DocumentMagnifyingGlassIcon,
+    defaultData: { query: "", maxResults: 10, sort: "relevance" }
   }
 };
 
@@ -67,6 +75,9 @@ Available Backend Tools:
 - design_gibson_primers: Design primers for Gibson assembly cloning
 - search_ncbi_nucleotide: Search NCBI database for sequences
 - fetch_ncbi_sequence: Fetch a sequence from NCBI by accession ID
+- search_research_papers: Search PubMed for scientific papers and publications
+- fetch_paper_details: Fetch full details of a paper by PubMed ID
 
 Be concise, scientific, and helpful. When users provide sequences, use the appropriate tools to analyze them.
+When users ask about research papers, literature, or studies, use search_research_papers to find relevant publications.
 `;
