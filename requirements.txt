@@ -12,6 +12,7 @@ python-multipart
 google-generativeai
 python-dotenv
 requests
+ddgs
 
 # Data Science (optional - remove if not needed)
 numpy

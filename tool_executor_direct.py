@@ -11,6 +11,7 @@ from utils.Restriction_Enzyme import find_restriction_sites
 from utils.Gibson_Assembly import design_gibson_primers
 from utils.ncbi_util import NCBIUtil
 from utils.pubmed_util import PubMedUtil
+from utils.web_search import search_web, search_scientific_papers, search_protocols
 
 
 class DirectToolExecutor:
@@ -48,6 +49,12 @@ class DirectToolExecutor:
                 return self._search_papers(parameters)
             elif function_name == "fetch_paper_details":
                 return self._fetch_paper_details(parameters)
+            elif function_name == "search_web":
+                return self._search_web(parameters)
+            elif function_name == "search_scientific_papers":
+                return self._search_scientific_papers(parameters)
+            elif function_name == "search_protocols":
+                return self._search_protocols(parameters)
             else:
                 return {
                     "error": f"Unknown function: {function_name}",
@@ -213,6 +220,21 @@ class DirectToolExecutor:
             "success": False,
             "message": "Could not fetch paper details"
         }
+    
+    def _search_web(self, params: Dict) -> Dict:
+        query = params.get("query", "")
+        max_results = params.get("max_results", 5)
+        return search_web(query, max_results)
+    
+    def _search_scientific_papers(self, params: Dict) -> Dict:
+        query = params.get("query", "")
+        max_results = params.get("max_results", 5)
+        return search_scientific_papers(query, max_results)
+    
+    def _search_protocols(self, params: Dict) -> Dict:
+        query = params.get("query", "")
+        max_results = params.get("max_results", 3)
+        return search_protocols(query, max_results)
     
     def health_check(self) -> bool:
         """Always returns True since we're calling functions directly."""

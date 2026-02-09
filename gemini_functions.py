@@ -189,6 +189,60 @@ GEMINI_FUNCTIONS = [
             },
             "required": ["pmid"]
         }
+    },
+    {
+        "name": "search_web",
+        "description": "Search the web for scientific information, research papers, protocols, or general molecular biology knowledge. Use this when you need to find current information, troubleshooting tips, or best practices.",
+        "parameters": {
+            "type_": "OBJECT",
+            "properties": {
+                "query": {
+                    "type_": "STRING",
+                    "description": "Search query. Be specific and include relevant scientific terms"
+                },
+                "max_results": {
+                    "type_": "INTEGER",
+                    "description": "Maximum number of search results to return. Default: 5"
+                }
+            },
+            "required": ["query"]
+        }
+    },
+    {
+        "name": "search_scientific_papers",
+        "description": "Search specifically for scientific papers and articles from academic sources. Use this when you need peer-reviewed information or research citations.",
+        "parameters": {
+            "type_": "OBJECT",
+            "properties": {
+                "query": {
+                    "type_": "STRING",
+                    "description": "Scientific query"
+                },
+                "max_results": {
+                    "type_": "INTEGER",
+                    "description": "Maximum number of papers to return. Default: 5"
+                }
+            },
+            "required": ["query"]
+        }
+    },
+    {
+        "name": "search_protocols",
+        "description": "Search for laboratory protocols and experimental methods. Use when users need step-by-step experimental procedures.",
+        "parameters": {
+            "type_": "OBJECT",
+            "properties": {
+                "query": {
+                    "type_": "STRING",
+                    "description": "Protocol or method query"
+                },
+                "max_results": {
+                    "type_": "INTEGER",
+                    "description": "Maximum number of protocols to return. Default: 3"
+                }
+            },
+            "required": ["query"]
+        }
     }
 ]
 
