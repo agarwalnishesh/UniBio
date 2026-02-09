@@ -1,14 +1,21 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { PaperAirplaneIcon, SparklesIcon, ChevronRightIcon, ChevronLeftIcon } from '@heroicons/react/24/solid';
-import { BeakerIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
+import { BeakerIcon, ArrowPathIcon, ArrowsPointingOutIcon } from '@heroicons/react/24/outline';
 import { useApp } from '../context/AppContext';
 import { api, FunctionCall } from '../services/api';
 import { ChatMessage } from '../types';
 import MarkdownRenderer from './MarkdownRenderer';
 import ChartRenderer from './charts/ChartRenderer';
 
+const MIN_WIDTH = 280;
+const MAX_WIDTH = 560;
+const DEFAULT_WIDTH = 320;
+
 const AgentChat: React.FC = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [sidebarWidth, setSidebarWidth] = useState(DEFAULT_WIDTH);
+  const [isResizing, setIsResizing] = useState(false);
+  const sidebarRef = useRef<HTMLDivElement>(null);
   // Initial welcome message is marked as a system message (not sent to API)
   const [messages, setMessages] = useState<ChatMessage[]>([
     { 
@@ -31,6 +38,47 @@ const AgentChat: React.FC = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Resize sidebar by dragging
+  const handleResizeStart = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResizing(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isResizing) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const newWidth = window.innerWidth - e.clientX;
+      if (newWidth >= MIN_WIDTH && newWidth <= MAX_WIDTH) {
+        setSidebarWidth(newWidth);
+      } else if (newWidth < MIN_WIDTH) {
+        setSidebarWidth(MIN_WIDTH);
+      } else if (newWidth > MAX_WIDTH) {
+        setSidebarWidth(MAX_WIDTH);
+      }
+    };
+
+    const handleMouseUp = () => setIsResizing(false);
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+  }, [isResizing]);
+
+  const cycleWidth = () => {
+    if (sidebarWidth <= MIN_WIDTH + 40) setSidebarWidth(DEFAULT_WIDTH);
+    else if (sidebarWidth < MAX_WIDTH - 40) setSidebarWidth(MAX_WIDTH);
+    else setSidebarWidth(MIN_WIDTH);
+  };
 
   const handleSendMessage = async () => {
     if (!input.trim() || isThinking) return;
@@ -152,16 +200,36 @@ const AgentChat: React.FC = () => {
     );
   }
 
-  // Expanded sidebar
+  // Expanded sidebar - resizable width
   return (
-    <div className="w-80 bg-white border-l border-slate-200 flex flex-col h-full flex-shrink-0">
+    <div 
+      ref={sidebarRef}
+      className="bg-white border-l border-slate-200 flex flex-col h-full flex-shrink-0 relative"
+      style={{ width: `${sidebarWidth}px` }}
+    >
+      {/* Resize handle - drag left/right to resize */}
+      <div
+        onMouseDown={handleResizeStart}
+        className={`absolute left-0 top-0 bottom-0 w-1 cursor-col-resize z-10 flex items-center justify-center group hover:bg-brand-500/30 transition-colors ${isResizing ? 'bg-brand-500/50' : ''}`}
+        title="Drag to resize"
+      >
+        <div className="w-0.5 h-12 bg-slate-300 rounded-full opacity-0 group-hover:opacity-100 group-active:opacity-100" />
+      </div>
+
       {/* Header */}
       <div className="bg-slate-900 p-4 flex items-center justify-between text-white flex-shrink-0">
         <div className="flex items-center gap-2">
           <SparklesIcon className="w-5 h-5 text-brand-400" />
           <h3 className="font-semibold text-sm">AI Assistant</h3>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5">
+          <button 
+            onClick={cycleWidth}
+            className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded transition-colors"
+            title="Expand / shrink panel"
+          >
+            <ArrowsPointingOutIcon className="w-4 h-4" />
+          </button>
           <button 
             onClick={clearChat}
             className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded transition-colors"
@@ -179,8 +247,8 @@ const AgentChat: React.FC = () => {
         </div>
       </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50 min-h-0">
+      {/* Messages - scrollable */}
+      <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-4 space-y-4 bg-slate-50">
         {messages.map((msg) => (
           <div key={msg.id} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
             <div className={`
