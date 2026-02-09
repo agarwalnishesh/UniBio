@@ -2,9 +2,10 @@ import React, { useState, useRef, useEffect } from 'react';
 import { PaperAirplaneIcon, SparklesIcon, ChevronRightIcon, ChevronLeftIcon } from '@heroicons/react/24/solid';
 import { BeakerIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 import { useApp } from '../context/AppContext';
-import { api } from '../services/api';
+import { api, FunctionCall } from '../services/api';
 import { ChatMessage } from '../types';
 import MarkdownRenderer from './MarkdownRenderer';
+import ChartRenderer from './charts/ChartRenderer';
 
 const AgentChat: React.FC = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -68,18 +69,21 @@ const AgentChat: React.FC = () => {
         }
 
         // Add the AI response - ALWAYS add something if we had function calls
-        if (response.response && response.response.trim()) {
+        const responseText = (response.response && response.response.trim()) 
+          ? response.response 
+          : (response.function_calls && response.function_calls.length > 0)
+            ? `I've completed the analysis using ${response.function_calls.length} tool(s). The results have been processed.`
+            : '';
+
+        if (responseText) {
           setMessages(prev => [...prev, { 
             id: Date.now().toString() + '_response', 
             role: 'model', 
-            text: response.response 
-          }]);
-        } else if (response.function_calls && response.function_calls.length > 0) {
-          // If no text response but we did call functions, add a fallback message
-          setMessages(prev => [...prev, { 
-            id: Date.now().toString() + '_response', 
-            role: 'model', 
-            text: `I've completed the analysis using ${response.function_calls.length} tool(s). The results have been processed. Is there anything specific you'd like to know about the results?`
+            text: responseText,
+            // Attach function calls data for chart rendering
+            functionCalls: response.function_calls && response.function_calls.length > 0 
+              ? response.function_calls 
+              : undefined
           }]);
         }
       } else {
@@ -178,7 +182,7 @@ const AgentChat: React.FC = () => {
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50 min-h-0">
         {messages.map((msg) => (
-          <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+          <div key={msg.id} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
             <div className={`
               max-w-[90%] rounded-2xl px-4 py-3 text-sm overflow-hidden
               ${msg.role === 'user' 
@@ -199,6 +203,12 @@ const AgentChat: React.FC = () => {
                 <MarkdownRenderer content={msg.text} className="break-words" />
               )}
             </div>
+            {/* Render charts after model responses that include function call data */}
+            {msg.functionCalls && msg.functionCalls.length > 0 && !msg.isToolCall && (
+              <div className="max-w-[90%] mt-2">
+                <ChartRenderer functionCalls={msg.functionCalls as FunctionCall[]} />
+              </div>
+            )}
           </div>
         ))}
         {isThinking && (

@@ -3,6 +3,8 @@ import { useApp } from '../../context/AppContext';
 import { ToolId, RestrictionData } from '../../types';
 import { ScissorsIcon, MagnifyingGlassIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { api, RestrictionEnzyme } from '../../services/api';
+import BarChart from '../charts/BarChart';
+import RestrictionMap from '../charts/RestrictionMap';
 
 const RestrictionAnalyzer: React.FC = () => {
   const { toolState, updateToolData, isAgentProcessing } = useApp();
@@ -143,6 +145,36 @@ const RestrictionAnalyzer: React.FC = () => {
                         And {multiCutters.length - 10} more enzymes...
                       </div>
                     )}
+                  </div>
+                </div>
+              )}
+
+              {/* Charts */}
+              {results.length > 0 && (
+                <div className="space-y-6">
+                  {/* Restriction Map */}
+                  <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                    <RestrictionMap
+                      title="Restriction Map"
+                      sequenceLength={data.sequence.length}
+                      sites={results.slice(0, 12).map(e => ({
+                        enzyme: e.enzyme_name,
+                        positions: e.cut_positions
+                      }))}
+                    />
+                  </div>
+
+                  {/* Cut Frequency Chart */}
+                  <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                    <BarChart
+                      title="Cut Frequency by Enzyme"
+                      yLabel="Number of Cuts"
+                      data={results.slice(0, 10).map((e, i) => ({
+                        label: e.enzyme_name,
+                        value: e.cut_count,
+                        color: e.cut_count === 1 ? '#22c55e' : '#f59e0b'
+                      }))}
+                    />
                   </div>
                 </div>
               )}

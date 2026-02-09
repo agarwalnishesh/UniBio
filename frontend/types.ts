@@ -60,6 +60,11 @@ export interface ChatMessage {
   text: string;
   isToolCall?: boolean;
   toolName?: string;
+  functionCalls?: Array<{
+    function: string;
+    arguments: Record<string, any>;
+    result: Record<string, any>;
+  }>;
 }
 
 export interface ToolDefinition {

@@ -10,6 +10,8 @@ import {
   ExclamationTriangleIcon 
 } from '@heroicons/react/24/outline';
 import { api, NCBISearchResult, NCBIFetchResponse } from '../../services/api';
+import PieChart from '../charts/PieChart';
+import GCContentPlot from '../charts/GCContentPlot';
 
 const NCBISearch: React.FC = () => {
   const { isAgentProcessing } = useApp();
@@ -280,6 +282,36 @@ const NCBISearch: React.FC = () => {
                 </div>
               </div>
             </div>
+
+            {/* Sequence Analysis Charts */}
+            {fetchedSequence.sequence && fetchedSequence.sequence.length > 20 && (
+              <div className="mt-6 space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Nucleotide Composition */}
+                  <div className="bg-slate-50 rounded-lg p-4 border border-slate-100">
+                    <PieChart
+                      title="Nucleotide Composition"
+                      data={[
+                        { label: 'Adenine (A)', value: (fetchedSequence.sequence.match(/A/gi) || []).length, color: '#22c55e' },
+                        { label: 'Thymine (T)', value: (fetchedSequence.sequence.match(/T/gi) || []).length, color: '#ef4444' },
+                        { label: 'Guanine (G)', value: (fetchedSequence.sequence.match(/G/gi) || []).length, color: '#3b82f6' },
+                        { label: 'Cytosine (C)', value: (fetchedSequence.sequence.match(/C/gi) || []).length, color: '#f59e0b' },
+                      ]}
+                      size={160}
+                    />
+                  </div>
+
+                  {/* GC Content Sliding Window */}
+                  <div className="bg-slate-50 rounded-lg p-4 border border-slate-100">
+                    <GCContentPlot
+                      title="GC Content (Sliding Window)"
+                      sequence={fetchedSequence.sequence}
+                      windowSize={Math.min(50, Math.floor(fetchedSequence.sequence.length / 5))}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

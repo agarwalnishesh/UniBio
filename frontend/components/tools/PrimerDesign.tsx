@@ -3,6 +3,8 @@ import { useApp } from '../../context/AppContext';
 import { ToolId, PrimerDesignData } from '../../types';
 import { ArrowPathIcon, ExclamationTriangleIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
 import { api, PrimerPair } from '../../services/api';
+import BarChart from '../charts/BarChart';
+import HeatMap from '../charts/HeatMap';
 
 const PrimerDesign: React.FC = () => {
   const { toolState, updateToolData, isAgentProcessing } = useApp();
@@ -146,6 +148,45 @@ const PrimerDesign: React.FC = () => {
                   </tbody>
                 </table>
               </div>
+
+              {/* Charts Section */}
+              {results.length > 1 && (
+                <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Tm Comparison Chart */}
+                  <div className="bg-slate-50 rounded-lg p-4 border border-slate-100">
+                    <BarChart
+                      title="Melting Temperature Comparison"
+                      yLabel="Tm (°C)"
+                      grouped={true}
+                      groupLabels={["Forward", "Reverse"]}
+                      data={results.map((pair) => ({
+                        label: `#${pair.pair_id + 1}`,
+                        value: pair.left_tm,
+                        color: '#0d9488',
+                        secondaryValue: pair.right_tm,
+                        secondaryColor: '#64748b'
+                      }))}
+                    />
+                  </div>
+
+                  {/* Quality Heatmap */}
+                  <div className="bg-slate-50 rounded-lg p-4 border border-slate-100">
+                    <HeatMap
+                      title="Primer Quality Matrix"
+                      rowLabels={results.map((p) => `Pair #${p.pair_id + 1}`)}
+                      colLabels={['Fwd Tm', 'Rev Tm', 'Fwd GC%', 'Rev GC%', 'Product']}
+                      colorScale="green"
+                      data={results.map((pair) => [
+                        { value: pair.left_tm },
+                        { value: pair.right_tm },
+                        { value: pair.left_gc },
+                        { value: pair.right_gc },
+                        { value: pair.product_size, label: `${pair.product_size}` }
+                      ])}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
